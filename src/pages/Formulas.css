@@ -1,0 +1,141 @@
+.formulas-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.formulas-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.formulas-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.formulas-subtitle {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.search-box {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.formula-search {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: var(--transition-smooth);
+}
+
+.formula-search:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.formulas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.formula-section {
+    padding: 1.5rem;
+    transition: var(--transition-smooth);
+}
+
+.formula-section:hover {
+    transform: translateY(-4px);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-light);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.section-icon {
+    font-size: 1.5rem;
+}
+
+.formulas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.formula-item {
+    display: grid;
+    grid-template-columns: 1fr auto 2fr;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    transition: var(--transition-fast);
+}
+
+.formula-item:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.formula-name {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.formula-eq {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.formula-value {
+    color: var(--text-main);
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .formulas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .formula-item {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+    }
+
+    .formula-eq {
+        display: none;
+    }
+
+    .formula-value {
+        margin-left: 1rem;
+    }
+}

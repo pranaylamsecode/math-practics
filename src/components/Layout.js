@@ -45,7 +45,7 @@ const Layout = ({ children }) => {
       </main>
 
       <footer className="footer-glass">
-        <p>© 2024 Math Practice | Bank Exam Preparation</p>
+        <p>© 2024 Math Practice </p>
       </footer>
     </div>
   );

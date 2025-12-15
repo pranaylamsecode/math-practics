@@ -8,6 +8,7 @@ import TablesDashboard from './pages/TablesDashboard';
 import RootsDashboard from './pages/RootsDashboard';
 import CubesDashboard from './pages/CubesDashboard';
 import Auth from './pages/Auth';
+import Formulas from './pages/Formulas';
 import './App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
             <Route path="/tables" element={<TablesDashboard />} />
             <Route path="/roots" element={<RootsDashboard />} />
             <Route path="/cubes" element={<CubesDashboard />} />
+            <Route path="/formulas" element={<Formulas />} />
             <Route path="/practice/:mode" element={<Practice />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

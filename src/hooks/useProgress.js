@@ -13,78 +13,138 @@ export const useProgress = () => {
             tables: { correct: 0, total: 0, streak: 0 }
         };
 
-        try {
-            const stored = sessionStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                const parsed = JSON.parse(stored);
-                return { ...defaultState, ...parsed };
+        // For non-logged users, use sessionStorage
+        if (!user) {
+            try {
+                const stored = sessionStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    return { ...defaultState, ...parsed };
+                }
+            } catch (e) {
+                console.error("Failed to load progress", e);
             }
-            return defaultState;
-        } catch (e) {
-            console.error("Failed to load progress", e);
-            return defaultState;
         }
+        return defaultState;
     });
 
-    // Sync FROM database when user logs in
+    // Load progress FROM database for logged-in users
     useEffect(() => {
         if (!user) return;
 
-        const fetchProgress = async () => {
+        const loadFromDatabase = async () => {
             try {
-                const { data, error } = await supabase
-                    .from('user_progress')
-                    .select('data')
-                    .eq('user_id', user.id)
-                    .single();
+                // Get records from last 30 days
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-                if (data?.data) {
-                    setProgress(prev => ({ ...prev, ...data.data }));
-                    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data.data));
+                const { data: records, error } = await supabase
+                    .from('practice_records')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .gte('created_at', thirtyDaysAgo.toISOString())
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                // Calculate stats from records
+                const stats = {
+                    root: { correct: 0, total: 0, streak: 0 },
+                    cube: { correct: 0, total: 0, streak: 0 },
+                    tables: { correct: 0, total: 0, streak: 0 }
+                };
+
+                if (records && records.length > 0) {
+                    records.forEach(record => {
+                        const mode = record.mode;
+                        if (stats[mode]) {
+                            stats[mode].total++;
+                            if (record.is_correct) {
+                                stats[mode].correct++;
+                            }
+                        }
+                    });
+
+                    // Calculate current streak (consecutive correct from most recent)
+                    ['root', 'cube', 'tables'].forEach(mode => {
+                        const modeRecords = records.filter(r => r.mode === mode);
+                        let streak = 0;
+                        for (const record of modeRecords) {
+                            if (record.is_correct) {
+                                streak++;
+                            } else {
+                                break;
+                            }
+                        }
+                        stats[mode].streak = streak;
+                    });
                 }
+
+                setProgress(stats);
+
+                // Auto-cleanup: Delete records older than 30 days
+                await supabase
+                    .from('practice_records')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .lt('created_at', thirtyDaysAgo.toISOString());
+
             } catch (err) {
                 console.error('Error loading progress:', err);
             }
         };
 
-        fetchProgress();
+        loadFromDatabase();
     }, [user?.id]);
 
-    // Persist to sessionStorage
+    // Persist to sessionStorage for non-logged users
     useEffect(() => {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-    }, [progress]);
+        if (!user) {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+    }, [progress, user]);
 
     const updateProgress = async (mode, isCorrect) => {
-        let newProgress;
-
-        setProgress(prev => {
-            const currentMode = prev[mode];
-            const updated = {
-                ...prev,
-                [mode]: {
-                    total: currentMode.total + 1,
-                    correct: currentMode.correct + (isCorrect ? 1 : 0),
-                    streak: isCorrect ? currentMode.streak + 1 : 0
-                }
-            };
-            newProgress = updated;
-            return updated;
-        });
-
-        // Sync TO database if logged in
-        if (user && newProgress) {
+        // If logged in, save individual record to database
+        if (user) {
             try {
                 await supabase
-                    .from('user_progress')
-                    .upsert({
+                    .from('practice_records')
+                    .insert({
                         user_id: user.id,
-                        data: newProgress,
-                        updated_at: new Date().toISOString()
+                        mode: mode,
+                        is_correct: isCorrect,
+                        created_at: new Date().toISOString()
                     });
+
+                // Update local state
+                setProgress(prev => {
+                    const currentMode = prev[mode];
+                    return {
+                        ...prev,
+                        [mode]: {
+                            total: currentMode.total + 1,
+                            correct: currentMode.correct + (isCorrect ? 1 : 0),
+                            streak: isCorrect ? currentMode.streak + 1 : 0
+                        }
+                    };
+                });
             } catch (err) {
-                console.error('Error saving progress:', err);
+                console.error('Error saving record:', err);
             }
+        } else {
+            // Not logged in - use sessionStorage
+            setProgress(prev => {
+                const currentMode = prev[mode];
+                return {
+                    ...prev,
+                    [mode]: {
+                        total: currentMode.total + 1,
+                        correct: currentMode.correct + (isCorrect ? 1 : 0),
+                        streak: isCorrect ? currentMode.streak + 1 : 0
+                    }
+                };
+            });
         }
     };
 
@@ -95,20 +155,20 @@ export const useProgress = () => {
             tables: { correct: 0, total: 0, streak: 0 }
         };
         setProgress(resetState);
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(resetState));
 
         if (user) {
+            // Delete all records for logged-in user
             try {
                 await supabase
-                    .from('user_progress')
-                    .upsert({
-                        user_id: user.id,
-                        data: resetState,
-                        updated_at: new Date().toISOString()
-                    });
+                    .from('practice_records')
+                    .delete()
+                    .eq('user_id', user.id);
             } catch (err) {
                 console.error('Error resetting progress:', err);
             }
+        } else {
+            // Clear sessionStorage for non-logged user
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(resetState));
         }
     };
 

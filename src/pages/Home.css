@@ -90,6 +90,20 @@
 }
 
 .table-icon {
+    background: var(--gradient-accent);
+    color: white;
+}
+
+.formulas-icon {
+    background: var(--gradient-success);
+    font-size: 2rem;
+}
+
+.formulas-card:hover {
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.table-icon {
     color: #fbbf24;
     /* Amber */
 }

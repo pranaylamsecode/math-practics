@@ -78,6 +78,18 @@ const Home = () => {
           </div>
           <div className="card-arrow">→</div>
         </Link>
+
+        <Link to="/formulas" className="action-card glass-panel formulas-card">
+          <div className="card-icon formulas-icon">📚</div>
+          <div className="card-content">
+            <h3>Math Formulas</h3>
+            <p>All important formulas for bank exams.</p>
+            <span className="streak-badge">
+              ⭐ Quick Reference
+            </span>
+          </div>
+          <div className="card-arrow">→</div>
+        </Link>
       </div>
     </div>
   );
