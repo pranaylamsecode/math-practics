@@ -9,6 +9,10 @@ import RootsDashboard from './pages/RootsDashboard';
 import CubesDashboard from './pages/CubesDashboard';
 import Auth from './pages/Auth';
 import Formulas from './pages/Formulas';
+import Reasoning from './pages/Reasoning';
+import English from './pages/English';
+import ReasoningPractice from './pages/ReasoningPractice';
+import EnglishPractice from './pages/EnglishPractice';
 import './App.css';
 
 function App() {
@@ -23,6 +27,10 @@ function App() {
             <Route path="/roots" element={<RootsDashboard />} />
             <Route path="/cubes" element={<CubesDashboard />} />
             <Route path="/formulas" element={<Formulas />} />
+            <Route path="/reasoning" element={<Reasoning />} />
+            <Route path="/reasoning/practice/:topic" element={<ReasoningPractice />} />
+            <Route path="/english" element={<English />} />
+            <Route path="/english/practice/:topic" element={<EnglishPractice />} />
             <Route path="/practice/:mode" element={<Practice />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

@@ -177,7 +177,7 @@ const Formulas = () => {
         <div className="formulas-container">
             <div className="formulas-header">
                 <Link to="/" className="back-link">← Back</Link>
-                <h2 className="title-gradient">📚 Math Formulas for Bank Exams</h2>
+                <h2 className="title-gradient">📚 Math Formulas</h2>
                 <p className="formulas-subtitle">Quick reference for all important formulas</p>
             </div>
 

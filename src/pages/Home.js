@@ -83,9 +83,33 @@ const Home = () => {
           <div className="card-icon formulas-icon">📚</div>
           <div className="card-content">
             <h3>Math Formulas</h3>
-            <p>All important formulas for bank exams.</p>
+            <p>All important formulas & shortcuts.</p>
             <span className="streak-badge">
               ⭐ Quick Reference
+            </span>
+          </div>
+          <div className="card-arrow">→</div>
+        </Link>
+
+        <Link to="/reasoning" className="action-card glass-panel reasoning-card">
+          <div className="card-icon reasoning-icon">🧠</div>
+          <div className="card-content">
+            <h3>Reasoning</h3>
+            <p>Logical & analytical reasoning topics.</p>
+            <span className="streak-badge">
+              💡 Study Guide
+            </span>
+          </div>
+          <div className="card-arrow">→</div>
+        </Link>
+
+        <Link to="/english" className="action-card glass-panel english-card">
+          <div className="card-icon english-icon">📖</div>
+          <div className="card-content">
+            <h3>English</h3>
+            <p>Grammar, vocabulary & comprehension.</p>
+            <span className="streak-badge">
+              ✍️ Language Guide
             </span>
           </div>
           <div className="card-arrow">→</div>

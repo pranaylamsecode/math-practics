@@ -103,6 +103,24 @@
     border-color: rgba(16, 185, 129, 0.4);
 }
 
+.reasoning-icon {
+    background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+    font-size: 2rem;
+}
+
+.reasoning-card:hover {
+    border-color: rgba(236, 72, 153, 0.4);
+}
+
+.english-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    font-size: 2rem;
+}
+
+.english-card:hover {
+    border-color: rgba(139, 92, 246, 0.4);
+}
+
 .table-icon {
     color: #fbbf24;
     /* Amber */
