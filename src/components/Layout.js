@@ -1,46 +1,51 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import './Layout.css'; // We'll create this for specific layout styles if needed, or use inline/global
+import { useAuth } from '../context/AuthContext';
+import './Layout.css';
 
 const Layout = ({ children }) => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="layout-container">
       <nav className="glass-panel navbar">
         <div className="logo-container">
           <Link to="/" className="logo-link">
-            <h1 className="app-title title-gradient">Math Practice</h1>
+            <h1 className="app-title title-gradient">📚 Math Practice</h1>
           </Link>
         </div>
         <div className="nav-links">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
           >
             Dashboard
           </Link>
-          <Link 
-            to="/practice/root" 
-            className={`nav-item ${location.pathname.includes('root') ? 'active' : ''}`}
-          >
-            Square Root
-          </Link>
-          <Link 
-            to="/practice/cube" 
-            className={`nav-item ${location.pathname.includes('cube') ? 'active' : ''}`}
-          >
-            Cube Root
-          </Link>
+
+          {user ? (
+            <>
+              <span className="user-email">{user.email}</span>
+              <button onClick={signOut} className="nav-item btn-link">
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/auth"
+              className={`nav-item auth-link ${location.pathname === '/auth' ? 'active' : ''}`}
+            >
+              Login
+            </Link>
+          )}
         </div>
       </nav>
 
       <main className="main-content">
         {children}
       </main>
-      
+
       <footer className="footer-glass">
-        <p>© 2025 Math Practice. Build your skills.</p>
+        <p>© 2024 Math Practice | Bank Exam Preparation</p>
       </footer>
     </div>
   );

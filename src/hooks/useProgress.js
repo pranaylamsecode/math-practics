@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 const STORAGE_KEY = 'math_practice_progress_v1';
 
 export const useProgress = () => {
+    const { user } = useAuth();
     const [progress, setProgress] = useState(() => {
         const defaultState = {
             root: { correct: 0, total: 0, streak: 0 },
@@ -14,7 +17,6 @@ export const useProgress = () => {
             const stored = sessionStorage.getItem(STORAGE_KEY);
             if (stored) {
                 const parsed = JSON.parse(stored);
-                // Merge parsed with defaultState to ensure new keys (like 'tables') exist
                 return { ...defaultState, ...parsed };
             }
             return defaultState;
@@ -24,14 +26,41 @@ export const useProgress = () => {
         }
     });
 
+    // Sync FROM database when user logs in
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchProgress = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('user_progress')
+                    .select('data')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (data?.data) {
+                    setProgress(prev => ({ ...prev, ...data.data }));
+                    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data.data));
+                }
+            } catch (err) {
+                console.error('Error loading progress:', err);
+            }
+        };
+
+        fetchProgress();
+    }, [user?.id]);
+
+    // Persist to sessionStorage
     useEffect(() => {
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
     }, [progress]);
 
-    const updateProgress = (mode, isCorrect) => {
+    const updateProgress = async (mode, isCorrect) => {
+        let newProgress;
+
         setProgress(prev => {
             const currentMode = prev[mode];
-            return {
+            const updated = {
                 ...prev,
                 [mode]: {
                     total: currentMode.total + 1,
@@ -39,10 +68,27 @@ export const useProgress = () => {
                     streak: isCorrect ? currentMode.streak + 1 : 0
                 }
             };
+            newProgress = updated;
+            return updated;
         });
+
+        // Sync TO database if logged in
+        if (user && newProgress) {
+            try {
+                await supabase
+                    .from('user_progress')
+                    .upsert({
+                        user_id: user.id,
+                        data: newProgress,
+                        updated_at: new Date().toISOString()
+                    });
+            } catch (err) {
+                console.error('Error saving progress:', err);
+            }
+        }
     };
 
-    const resetProgress = () => {
+    const resetProgress = async () => {
         const resetState = {
             root: { correct: 0, total: 0, streak: 0 },
             cube: { correct: 0, total: 0, streak: 0 },
@@ -50,6 +96,20 @@ export const useProgress = () => {
         };
         setProgress(resetState);
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(resetState));
+
+        if (user) {
+            try {
+                await supabase
+                    .from('user_progress')
+                    .upsert({
+                        user_id: user.id,
+                        data: resetState,
+                        updated_at: new Date().toISOString()
+                    });
+            } catch (err) {
+                console.error('Error resetting progress:', err);
+            }
+        }
     };
 
     return { progress, updateProgress, resetProgress };
