@@ -89,6 +89,11 @@
     color: var(--secondary);
 }
 
+.table-icon {
+    color: #fbbf24;
+    /* Amber */
+}
+
 .card-content h3 {
     color: var(--text-main);
     margin-bottom: 0.5rem;

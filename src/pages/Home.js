@@ -7,7 +7,7 @@ const Home = () => {
   const { progress } = useProgress();
 
   const getAccuracy = (mode) => {
-    if (progress[mode].total === 0) return 0;
+    if (!progress[mode] || progress[mode].total === 0) return 0;
     return Math.round((progress[mode].correct / progress[mode].total) * 100);
   };
 
@@ -32,11 +32,18 @@ const Home = () => {
             </div>
             <span className="stat-label">Accuracy</span>
           </div>
+          <div className="stat-card">
+            <h3>Tables</h3>
+            <div className={`stat-value ${getAccuracy('tables') > 80 ? 'good' : ''}`}>
+              {getAccuracy('tables') || 0}%
+            </div>
+            <span className="stat-label">Accuracy</span>
+          </div>
         </div>
       </header>
 
       <div className="actions-grid">
-        <Link to="/practice/root" className="action-card glass-panel">
+        <Link to="/roots" className="action-card glass-panel">
           <div className="card-icon root-icon">√</div>
           <div className="card-content">
             <h3>Square Root Practice</h3>
@@ -48,13 +55,25 @@ const Home = () => {
           <div className="card-arrow">→</div>
         </Link>
 
-        <Link to="/practice/cube" className="action-card glass-panel">
+        <Link to="/cubes" className="action-card glass-panel">
           <div className="card-icon cube-icon">³√</div>
           <div className="card-content">
             <h3>Cube Root Practice</h3>
             <p>Calculate cube roots of perfect cubes.</p>
             <span className="streak-badge">
               🔥Streak: {progress.cube.streak}
+            </span>
+          </div>
+          <div className="card-arrow">→</div>
+        </Link>
+
+        <Link to="/tables" className="action-card glass-panel">
+          <div className="card-icon table-icon">×</div>
+          <div className="card-content">
+            <h3>Multiplication Tables</h3>
+            <p>Study tables 1-30 or take a challenge.</p>
+            <span className="streak-badge">
+              🔥Streak: {progress.tables ? progress.tables.streak : 0}
             </span>
           </div>
           <div className="card-arrow">→</div>

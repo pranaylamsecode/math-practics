@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { useProgress } from '../hooks/useProgress';
 import './Practice.css';
 
 const Practice = () => {
-  const { mode } = useParams(); // 'root' or 'cube'
+  const { mode } = useParams(); // 'root' or 'cube' or 'tables'
+  const location = useLocation(); // Hook to get query params
   const { updateProgress } = useProgress();
   const [question, setQuestion] = useState(null);
   const [answer, setAnswer] = useState('');
@@ -13,7 +14,32 @@ const Practice = () => {
   const inputRef = useRef(null);
   const timerRef = useRef(null);
 
+  const getQueryParams = () => {
+    const params = new URLSearchParams(location.search);
+    return {
+      min: parseInt(params.get('min')) || 1,
+      max: parseInt(params.get('max')) || 10
+    };
+  };
+
   const generateQuestion = () => {
+    if (mode === 'tables') {
+      const { min, max } = getQueryParams();
+      // Ensure min <= max
+      const safeMin = Math.min(min, max);
+      const safeMax = Math.max(min, max);
+
+      const base = Math.floor(Math.random() * (safeMax - safeMin + 1)) + safeMin;
+      const multiplier = Math.floor(Math.random() * 20) + 1; // 1 to 20
+
+      return {
+        base: base * multiplier, // For tables, the 'base' is the answer
+        multiplier,
+        value: base * multiplier,
+        display: `${base} × ${multiplier}`
+      };
+    }
+
     let base;
     if (mode === 'cube') {
       base = Math.floor(Math.random() * 30) + 1; // 1 to 30 for cubes
@@ -22,7 +48,7 @@ const Practice = () => {
     }
 
     const value = mode === 'cube' ? Math.pow(base, 3) : Math.pow(base, 2);
-    return { base, value };
+    return { base, value, display: value }; // Unified structure
   };
 
   const nextQuestion = () => {
@@ -63,10 +89,24 @@ const Practice = () => {
     if (!answer) return;
 
     const userVal = parseInt(answer, 10);
-    const isCorrect = userVal === question.base;
+    // For roots/cubes: question is value, answer is base.
+    // For tables: question is value (product), answer is also value (product)?
+    // Wait, generateQuestion logic:
+    // Roots: value = 25, base = 5. User enters 5. (Correct: userVal === base)
+    // Tables: value = 20 (from 4*5), base = 4. User enters 20. (Correct: userVal === value)
+
+    let isCorrect;
+    if (mode === 'tables') {
+      isCorrect = userVal === question.value;
+    } else {
+      isCorrect = userVal === question.base;
+    }
 
     setFeedback(isCorrect ? 'correct' : 'incorrect');
-    if (!isCorrect) setLastCorrectAnswer(question.base);
+    // Show correct answer accordingly
+    if (!isCorrect) {
+      setLastCorrectAnswer(mode === 'tables' ? question.value : question.base);
+    }
 
     updateProgress(mode, isCorrect);
 
@@ -89,8 +129,14 @@ const Practice = () => {
 
       <div className="game-card glass-panel">
         <div className="question-display">
-          <span className="symbol">{mode === 'cube' ? '∛' : '√'}</span>
-          <span className="number">{question.value}</span>
+          {mode === 'tables' ? (
+            <span className="expression">{question.display} = ?</span>
+          ) : (
+            <>
+              <span className="symbol">{mode === 'cube' ? '∛' : '√'}</span>
+              <span className="number">{question.display || question.value}</span>
+            </>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="answer-form">
