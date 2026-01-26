@@ -1,10 +1,29 @@
+import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../supabaseClient';
 import './Layout.css';
 
 const Layout = ({ children }) => {
   const location = useLocation();
   const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    // Increment visitor count once per session load
+    const incrementVisitor = async () => {
+      try {
+        await supabase.rpc('increment_visitor_count');
+      } catch (error) {
+        console.error('Error tracking visitor:', error);
+      }
+    };
+
+    // Only run if we haven't tracked this session yet (optional optimization, 
+    // but meant to be per-page-load essentially for "daily visitors" logic 
+    // usually implies unique visitors, but the RPC handles daily aggregating. 
+    // Calling it once per app mount is fine.)
+    incrementVisitor();
+  }, []);
 
   return (
     <div className="layout-container">

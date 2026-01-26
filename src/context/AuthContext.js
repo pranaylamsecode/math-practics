@@ -8,15 +8,33 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchRole = async (userId) => {
+            if (!userId) return null;
+            const { data } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', userId)
+                .single();
+            return data?.role;
+        };
+
         // Check active session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
+            let role = null;
+            if (session?.user) {
+                role = await fetchRole(session.user.id);
+            }
+            setUser(session?.user ? { ...session.user, role } : null);
             setLoading(false);
         });
 
         // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            let role = null;
+            if (session?.user) {
+                role = await fetchRole(session.user.id);
+            }
+            setUser(session?.user ? { ...session.user, role } : null);
         });
 
         return () => subscription.unsubscribe();

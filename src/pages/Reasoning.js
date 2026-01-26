@@ -1,10 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 import './Reasoning.css';
 
 const Reasoning = () => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [dynamicContent, setDynamicContent] = useState('');
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            const { data } = await supabase
+                .from('content_updates')
+                .select('content')
+                .eq('section', 'reasoning')
+                .single();
+            if (data?.content?.text) {
+                setDynamicContent(data.content.text);
+            }
+        };
+        fetchContent();
+    }, []);
 
     const reasoningSections = [
         {
@@ -169,6 +185,11 @@ const Reasoning = () => {
                 <Link to="/" className="back-link">← Back</Link>
                 <h2 className="title-gradient">🧠 Reasoning</h2>
                 <p className="reasoning-subtitle">Logical & Analytical Reasoning Topics</p>
+                {dynamicContent && (
+                    <div className="dynamic-content glass-panel" style={{ marginTop: '20px', padding: '15px', whiteSpace: 'pre-wrap' }}>
+                        {dynamicContent}
+                    </div>
+                )}
             </div>
 
             <div className="search-box">

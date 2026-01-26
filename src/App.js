@@ -15,6 +15,11 @@ import ReasoningPractice from './pages/ReasoningPractice';
 import EnglishPractice from './pages/EnglishPractice';
 import './App.css';
 
+import RequireAdmin from './components/RequireAdmin';
+import AdminDashboard from './pages/AdminDashboard';
+import ContentManager from './pages/ContentManager';
+import './pages/AdminDashboard.css';
+
 function App() {
   return (
     <AuthProvider>
@@ -23,6 +28,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
+
+            {/* Public Routes */}
             <Route path="/tables" element={<TablesDashboard />} />
             <Route path="/roots" element={<RootsDashboard />} />
             <Route path="/cubes" element={<CubesDashboard />} />
@@ -32,6 +39,25 @@ function App() {
             <Route path="/english" element={<English />} />
             <Route path="/english/practice/:topic" element={<EnglishPractice />} />
             <Route path="/practice/:mode" element={<Practice />} />
+
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <RequireAdmin>
+                  <AdminDashboard />
+                </RequireAdmin>
+              }
+            />
+            <Route
+              path="/admin/content"
+              element={
+                <RequireAdmin>
+                  <ContentManager />
+                </RequireAdmin>
+              }
+            />
+
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
